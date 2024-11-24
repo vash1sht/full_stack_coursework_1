@@ -6,145 +6,7 @@
     <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <title>Shopping Cart</title>
-    <style>
-        /* Global styling */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7fc;
-            color: #333;
-        }
-
-        /* Header Styling */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 40px;
-            background-color: #4e73df;
-            color: white;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #ccc;
-        }
-
-        header h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        /* Cart container */
-        #cart-container {
-            padding: 30px;
-            max-width: 1200px;
-            margin: 30px auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        #cart-container h3 {
-            margin-top: 0;
-            font-size: 26px;
-            font-weight: 500;
-            color: #333;
-            border-bottom: 2px solid #f1f1f1;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        #cart-items {
-            margin-top: 20px;
-        }
-
-        #cart-items ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        #cart-items li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            background-color: #ffffff;
-            box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            border: 1px solid #ddd;
-        }
-
-        #cart-items li:hover {
-            transform: translateY(-5px);
-            background-color: #f9fafb;
-        }
-
-        #cart-items li span {
-            font-size: 16px;
-            color: #555;
-        }
-
-        #cart-items li strong {
-            font-weight: 600;
-            color: #333;
-        }
-
-        button {
-            background-color: #4e73df;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #2e59d9;
-        }
-
-        .cart-summary {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #f1f1f1;
-        }
-
-        .cart-summary p {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .empty-cart-message {
-            font-size: 18px;
-            color: #888;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            #cart-container {
-                padding: 20px;
-                margin: 20px;
-            }
-
-            header h1 {
-                font-size: 24px;
-            }
-
-            button {
-                width: 100%;
-                padding: 12px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/styles/shopping_cart.css">
 </head>
 <body>
     <header>
@@ -160,14 +22,41 @@
             <ul id="cart-items">
                 <li v-for="item in cart" :key="item.subject">
                     <div>
-                        <strong>{{ item.subject }}</strong> - £{{ item.price }}
+                        <strong>{{ item.subject }}</strong> - £{{ item.price }} x 
+                        <select v-model="item.quantity" @change="updateCart()">
+                            <option v-for="n in maxQuantity(item)" :key="n" :value="n">{{ n }}</option>
+                        </select>
                     </div>
-                    <button @click="removeFromCart(item)">Remove</button>
+                    <div>
+                        <button @click="removeFromCart(item)">Remove</button>
+                    </div>
                 </li>
             </ul>
             <div class="cart-summary">
                 <p><strong>Total: £{{ totalPrice }}</strong></p>
-                <button @click="proceedToCheckout">Proceed to Checkout</button>
+                <button @click="showCheckoutForm = true">Proceed to Checkout</button>
+            </div>
+
+            <!-- Checkout Form -->
+            <div v-if="showCheckoutForm" class="checkout-form">
+                <h3>Checkout</h3>
+                <form @submit.prevent="submitOrder">
+                    <div>
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" v-model="order.name" required>
+                    </div>
+                    <div>
+                        <label for="phone">Phone:</label>
+                        <input type="tel" id="phone" v-model="order.phone" required>
+                    </div>
+
+                    <div v-for="(item, index) in cart" :key="item.subject">
+                        <input type="hidden" :value="item.subject" :name="'lesson_id[' + index + ']'">
+                        <input type="hidden" :value="item.quantity" :name="'num_of_space[' + index + ']'">
+                    </div>
+
+                    <button type="submit">Submit Order</button>
+                </form>
             </div>
         </div>
     </div>
@@ -176,21 +65,103 @@
         new Vue({
             el: '#cart-container',
             data: {
-                cart: JSON.parse(localStorage.getItem('cart')) || []
+                cart: JSON.parse(localStorage.getItem('cart')) || [],
+                showCheckoutForm: false,
+                order: {
+                    name: '',
+                    phone: ''
+                }
             },
             computed: {
                 totalPrice() {
-                    return this.cart.reduce((sum, item) => sum + item.price, 0).toFixed(2);
+                    return this.cart.reduce((sum, item) => {
+                        return sum + (parseFloat(item.price) * item.quantity);
+                    }, 0).toFixed(2);
                 }
             },
             methods: {
+                addToCart(item) {
+                    item.price = parseFloat(item.price);
+                    let existingItem = this.cart.find(cartItem => cartItem.subject === item.subject);
+
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        this.cart.push({...item, quantity: 1});
+                    }
+
+                    localStorage.setItem('cart', JSON.stringify(this.cart));
+                },
                 removeFromCart(item) {
                     this.cart = this.cart.filter(cartItem => cartItem !== item);
                     localStorage.setItem('cart', JSON.stringify(this.cart));
                 },
-                proceedToCheckout() {
-                    alert('Proceeding to Checkout!');
+                updateCart() {
+                    localStorage.setItem('cart', JSON.stringify(this.cart));
+                },
+                maxQuantity(item) {
+                    return Math.min(10, item.stock || 10); 
+                },
+                modify_space_attribute(attribute, lesson_name, space) {
+                    fetch(`https://coursework-1-backend.onrender.com/space/${lesson_name}/${space}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Space updated successfully:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating space:', error);
+                    });
+                },
+                submitOrder() {
+                    const orderData = {
+                        name: this.order.name,
+                        phone: this.order.phone,
+                        lesson_id: this.cart.map(item => item.subject),
+                        num_of_space: this.cart.map(item => item.quantity)
+                    };
+
+                    console.log(this.cart);
+
+                    // Send order data to backend
+                    fetch('https://coursework-1-backend.onrender.com/order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(orderData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to submit order');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert('Order submitted successfully!');
+                        // Call modify_space_attribute for each lesson and its corresponding quantity
+                        for (let i = 0; i < orderData.lesson_id.length; i++) {
+                            this.modify_space_attribute(
+                                'space',
+                                orderData.lesson_id[i],
+                                orderData.num_of_space[i]
+                            );
+                        }
+                        // Clear the cart after successful order
+                        this.cart = [];
+                        localStorage.setItem('cart', JSON.stringify(this.cart));
+                        this.showCheckoutForm = false;  // Hide form after submission
+                    })
+                    .catch(error => {
+                        alert('Error submitting order!');
+                        console.error(error);
+                    });
                 }
+
             }
         });
     </script>
