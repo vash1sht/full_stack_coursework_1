@@ -40,10 +40,10 @@
             </div>
 
             <!-- Lessons Display -->
-            <div v-else-if="lessons.length === 0">
+            <div v-else-if="filteredLessons.length === 0">
                 No lessons available at the moment.
             </div>
-            <div v-else v-for="lesson in lessons" :key="lesson.subject" class="lesson">
+            <div v-else v-for="lesson in filteredLessons" :key="lesson.subject" class="lesson">
                 <div class="lesson-info">
                     <h2>{{ lesson.subject }}</h2>
                     <p>Location: {{ lesson.location }}</p>
@@ -74,6 +74,26 @@
                 cart: [],
                 loading: true       // Track loading state
             },
+            computed: {
+                // Filtered and sorted lessons based on search and sort order
+                filteredLessons() {
+                    return this.sortedLessons.filter(lesson => {
+                        const query = this.searchQuery.toLowerCase();
+                        return lesson.subject.toLowerCase().includes(query) || 
+                               lesson.location.toLowerCase().includes(query);
+                    });
+                },
+                sortedLessons() {
+                    return this.lessons.slice().sort((a, b) => {
+                        const modifier = this.sortOrder === 'asc' ? 1 : -1;
+                        if (typeof a[this.sortBy] === 'string') {
+                            return a[this.sortBy].localeCompare(b[this.sortBy]) * modifier;
+                        } else {
+                            return (a[this.sortBy] - b[this.sortBy]) * modifier;
+                        }
+                    });
+                }
+            },
             methods: {
                 async fetchLessons() {
                     try {
@@ -94,7 +114,6 @@
                         alert("Unable to load lessons. Please try again later.");
                     } finally {
                         this.loading = false;  // Stop loading once data is fetched
-
                     }
                 },
                 addToCart(lesson) {
@@ -108,7 +127,7 @@
                 // Load cart from localStorage
                 const savedCart = localStorage.getItem('cart');
                 if (savedCart) {
-                this.cart = JSON.parse(savedCart);
+                    this.cart = JSON.parse(savedCart);
                 }
             },
         });
