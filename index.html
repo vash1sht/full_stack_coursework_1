@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <title>Lessons Store</title>
     <style>
+        /* Global styling */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -14,6 +16,7 @@
             color: #333;
         }
 
+        /* Header Styling */
         header {
             display: flex;
             justify-content: space-between;
@@ -113,53 +116,135 @@
         button#addtocart:hover {
             background-color: darkblue;
         }
-
-        footer {
-            background-color: #0077b6;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
+        #cart {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
         }
+
+        #cart h3 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        #cart ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #cart li {
+            margin-bottom: 5px;
+        }
+
+        #cart p {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #999;
+        }
+
     </style>
 </head>
 <body>
     <header>
         <h1>Lessons Store</h1>
-        <input id="search-bar" type="text" placeholder="Search lessons...">
+        <input id="search-bar" type="text" v-model="searchQuery" placeholder="Search lessons...">
         <a href="shopping_cart.html">
             <button>
-                <i class="fas fa-shopping-cart"></i> Cart (0)
+                <i class="fas fa-shopping-cart"></i> Cart ({{ cart.length }})
             </button>
         </a>
     </header>
 
+
+
+    
     <div id="coursework1">
+        <!-- Sidebar for sorting options -->
         <div class="sidebar">
             <h2>Sort By:</h2>
-            <label><input type="radio" name="sort"> Subject</label>
-            <label><input type="radio" name="sort"> Location</label>
-            <label><input type="radio" name="sort"> Price</label>
-            <label><input type="radio" name="sort"> Spaces</label><br><br>
-            <label><input type="radio" name="order"> Ascending</label><br>
-            <label><input type="radio" name="order"> Descending</label>
+            <label><input type="radio" value="subject" v-model="sortBy"> Subject</label>
+            <label><input type="radio" value="location" v-model="sortBy"> Location</label>
+            <label><input type="radio" value="price" v-model="sortBy"> Price</label>
+            <label><input type="radio" value="spaces" v-model="sortBy"> Spaces</label><br><br>
+            <label><input type="radio" value="asc" v-model="sortOrder"> Ascending</label><br>
+            <label><input type="radio" value="desc" v-model="sortOrder"> Descending</label>
         </div>
         
+        <!-- Lessons Container -->
         <div class="lessons-container">
-            <div class="lesson">
+            <div v-for="lesson in filteredLessons" :key="lesson.subject" class="lesson">
                 <div class="lesson-info">
-                    <h2>Maths</h2>
-                    <p>Location: London</p>
-                    <p>Price: £100</p>
-                    <p>Spaces: 5</p>
-                    <button id="addtocart">Add to Cart</button>
+                    <h2>{{ lesson.subject }}</h2>
+                    <p>Location: {{ lesson.location }}</p>
+                    <p>Price: £{{ lesson.price }}</p>
+                    <p>Spaces: {{ lesson.spaces }}</p>
+                    <button id="addtocart" @click="addToCart(lesson)">Add to Cart</button>
                 </div>
-                <img src="https://via.placeholder.com/40" alt="Lesson Icon" class="lesson-icon">
+                <img :src="lesson.icon" alt="Lesson Icon" class="lesson-icon">
             </div>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2024 Lessons Store. All Rights Reserved.</p>
-    </footer>
+        <!-- Footer -->
+        <footer style="background-color: #0077b6; color: white; padding: 10px 0; text-align: center;">
+            <p>&copy; 2024 Lessons Store. All Rights Reserved.</p>
+        </footer>
+
+    <script>
+        new Vue({
+            el: '#coursework1',
+            data: {
+                sortBy: 'subject', // Default sorting option
+                sortOrder: 'asc',  // Default sorting order
+                searchQuery: '',   // Search query
+                lessons: [
+                    { subject: 'Maths', location: 'London', price: 100, spaces: 5, icon: 'maths-symbols-background-icon.png' },
+                    { subject: 'Science', location: 'Manchester', price: 80, spaces: 3, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'History', location: 'Bristol', price: 90, spaces: 4, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
+
+
+                    { subject: 'English', location: 'Leeds', price: 85, spaces: 2, icon: 'https://via.placeholder.com/40' }
+                ],
+                cart: []
+            },
+            computed: {
+                // Filtered and sorted lessons based on search and sort order
+                filteredLessons() {
+                    return this.sortedLessons.filter(lesson => {
+                        const query = this.searchQuery.toLowerCase();
+                        return lesson.subject.toLowerCase().includes(query) || 
+                               lesson.location.toLowerCase().includes(query);
+                    });
+                },
+                sortedLessons() {
+                    return this.lessons.slice().sort((a, b) => {
+                        const modifier = this.sortOrder === 'asc' ? 1 : -1;
+                        if (typeof a[this.sortBy] === 'string') {
+                            return a[this.sortBy].localeCompare(b[this.sortBy]) * modifier;
+                        } else {
+                            return (a[this.sortBy] - b[this.sortBy]) * modifier;
+                        }
+                    });
+                }
+            },
+            methods: {
+                // Add lesson to cart
+                addToCart(lesson) {
+                    this.cart.push(lesson);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
