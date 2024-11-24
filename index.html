@@ -154,9 +154,6 @@
             </button>
         </a>
     </header>
-
-
-
     
     <div id="coursework1">
         <!-- Sidebar for sorting options -->
@@ -172,7 +169,10 @@
         
         <!-- Lessons Container -->
         <div class="lessons-container">
-            <div v-for="lesson in filteredLessons" :key="lesson.subject" class="lesson">
+            <div v-if="lessons.length === 0">
+                No lessons available at the moment.
+            </div>
+            <div v-else v-for="lesson in lessons" :key="lesson.subject" class="lesson">
                 <div class="lesson-info">
                     <h2>{{ lesson.subject }}</h2>
                     <p>Location: {{ lesson.location }}</p>
@@ -191,58 +191,44 @@
         </footer>
 
     <script>
+        // Set your backend URL
+        const BACKEND_SERVER_URL = 'https://coursework-1-backend.onrender.com';
         new Vue({
             el: '#coursework1',
             data: {
-                sortBy: 'subject', // Default sorting option
-                sortOrder: 'asc',  // Default sorting order
-                searchQuery: '',   // Search query
-                lessons: [
-                    { subject: 'Maths', location: 'London', price: 100, spaces: 5, icon: 'maths-symbols-background-icon.png' },
-                    { subject: 'Science', location: 'Manchester', price: 80, spaces: 3, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'History', location: 'Bristol', price: 90, spaces: 4, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-                    { subject: 'Art', location: 'Liverpool', price: 70, spaces: 6, icon: 'https://via.placeholder.com/40' },
-
-
-                    { subject: 'English', location: 'Leeds', price: 85, spaces: 2, icon: 'https://via.placeholder.com/40' }
-                ],
+                lessons: [],  // Initialize lessons array
+                sortBy: 'subject',  // Default sorting option
+                sortOrder: 'asc',   // Default sorting order
+                searchQuery: '',    // Search query
                 cart: []
             },
-            computed: {
-                // Filtered and sorted lessons based on search and sort order
-                filteredLessons() {
-                    return this.sortedLessons.filter(lesson => {
-                        const query = this.searchQuery.toLowerCase();
-                        return lesson.subject.toLowerCase().includes(query) || 
-                               lesson.location.toLowerCase().includes(query);
-                    });
-                },
-                sortedLessons() {
-                    return this.lessons.slice().sort((a, b) => {
-                        const modifier = this.sortOrder === 'asc' ? 1 : -1;
-                        if (typeof a[this.sortBy] === 'string') {
-                            return a[this.sortBy].localeCompare(b[this.sortBy]) * modifier;
-                        } else {
-                            return (a[this.sortBy] - b[this.sortBy]) * modifier;
-                        }
-                    });
-                }
-            },
             methods: {
-                // Add lesson to cart
+                async fetchLessons() {
+                    try {
+                        const response = await fetch(`${BACKEND_SERVER_URL}/lessons`);
+                        if (!response.ok) {
+                            throw new Error(`Error: ${response.statusText}`);
+                        }
+                        const data = await response.json();
+
+                        this.lessons = data.map(lesson => ({
+                            subject: lesson.topic,
+                            price: lesson.price,
+                            location: lesson.location,
+                            spaces: lesson.space,
+                            icon: `${BACKEND_SERVER_URL}/images/${lesson.topic.toLowerCase()}.png`
+                        }));
+                    } catch (error) {
+                        console.error("Error fetching lessons:", error);
+                        alert("Unable to load lessons. Please try again later.");
+                    }
+                },
                 addToCart(lesson) {
                     this.cart.push(lesson);
                 }
+            },
+            created() {
+                this.fetchLessons();
             }
         });
     </script>
