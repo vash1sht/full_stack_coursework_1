@@ -14,7 +14,7 @@
         <input id="search-bar" type="text" v-model="searchQuery" placeholder="Search lessons...">
         <a href="shopping_cart.html">
             <button>
-                <i class="fas fa-shopping-cart"></i> Cart ({{ cart.length }})
+                <i class="fas fa-shopping-cart"></i> View Cart
             </button>
         </a>
     </header>
@@ -99,11 +99,18 @@
                 },
                 addToCart(lesson) {
                     this.cart.push(lesson);
+                    // Save to localStorage
+                    localStorage.setItem('cart', JSON.stringify(this.cart));
                 }
             },
             created() {
                 this.fetchLessons();
-            }
+                // Load cart from localStorage
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                this.cart = JSON.parse(savedCart);
+                }
+            },
         });
     </script>
 </body>
