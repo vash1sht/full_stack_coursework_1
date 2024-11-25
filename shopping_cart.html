@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/styles/shopping_cart.css">
 </head>
 <body>
+    <!-- Header section with navigation to main page -->
     <header>
         <h1>Shopping Cart</h1>
         <a href="index.html">
@@ -18,15 +19,22 @@
         </a>
     </header>
 
+    <!-- Vue application container for the shopping cart -->
     <div id="cart-container">
         <h3>Your Cart</h3>
+
+        <!-- Display a message if the cart is empty -->
         <div v-if="cart.length === 0" class="empty-cart-message">
             Your cart is empty.
         </div>
+
+        <!-- Render cart items if available -->
         <div v-else>
             <ul id="cart-items">
+                <!-- Dynamically iterate through cart items and bind each item to a unique key -->
                 <li v-for="(item, index) in cart" :key="item.subject">
                     <div>
+                        <!-- Display item details with a removal option -->
                         <strong>{{ item.subject }}</strong> - £{{ item.price }} x 1
                         <button @click="removeFromCart(index)" class="remove-button">
                             <i class="fas fa-trash-alt"></i> Remove
@@ -34,14 +42,18 @@
                     </div>
                 </li>
             </ul>
+
+            <!-- Cart summary: Total price and checkout initiation -->
             <div class="cart-summary">
                 <p><strong>Total: £{{ totalPrice }}</strong></p>
                 <button @click="showCheckoutForm = true">Proceed to Checkout</button>
             </div>
 
+            <!-- Checkout form for capturing user details and finalizing the order -->
             <div v-if="showCheckoutForm" class="checkout-form">
                 <h3>Checkout</h3>
                 <form @submit.prevent="submitOrder">
+                    <!-- Name input field with real-time validation -->
                     <div>
                         <label for="name">Name:</label>
                         <input 
@@ -54,8 +66,13 @@
                             placeholder="Enter your name"
                             required
                         >
-                        <small v-if="!isNameValid && order.name.trim() !== ''" class="error-message">Name can only contain letters.</small>
+                        <!-- !isNameValid: Checks if the isNameValid variable is false -->
+                        <small v-if="!isNameValid && order.name.trim() !== ''" class="error-message">
+                            Name can only contain letters.
+                        </small> <!-- Small tag used for error message-->
                     </div>
+
+                    <!-- Phone input field with digit-only validation -->
                     <div>
                         <label for="phone">Phone:</label>
                         <input 
@@ -68,14 +85,19 @@
                             placeholder="Enter your phone number"
                             required
                         >
-                        <small v-if="!isPhoneValid && order.phone.trim() !== ''" class="error-message">Phone number should be digits only.</small>
+                        <!-- !isPhoneValid: Checks if the isPhoneValid variable is false -->
+                        <small v-if="!isPhoneValid && order.phone.trim() !== ''" class="error-message">
+                            Phone number should be digits only.
+                        </small>
                     </div>
 
+                    <!-- Hidden input fields for transmitting cart data -->
                     <div v-for="(item, index) in cart" :key="item.subject">
                         <input type="hidden" :value="item.subject" :name="'lesson_id[' + index + ']'">
                         <input type="hidden" value="1" :name="'num_of_space[' + index + ']'">
                     </div>
 
+                    <!-- Submit button disabled until form validation passes -->
                     <button type="submit" :disabled="!isFormValid">Submit</button>
                 </form>
             </div>
@@ -86,56 +108,56 @@
         new Vue({
             el: '#cart-container',
             data: {
+                // Initialize cart with data from localStorage or an empty array
                 cart: JSON.parse(localStorage.getItem('cart')) || [],
-                showCheckoutForm: false,
-                order: {
-                    name: '',
-                    phone: ''
-                },
-                isNameValid: false,
-                isPhoneValid: false
+                showCheckoutForm: false, // Toggle visibility of the checkout form
+                order: { name: '', phone: '' }, // Holds user order details
+                isNameValid: false, // Validation status for the name field
+                isPhoneValid: false // Validation status for the phone field
             },
             computed: {
+                // Compute the total price of all items in the cart
                 totalPrice() {
                     return this.cart.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2);
                 },
+                // Determine whether the form is valid based on field validations
                 isFormValid() {
                     return this.isNameValid && this.isPhoneValid;
                 }
             },
             methods: {
+                // Validate name to ensure it contains only letters and spaces
                 validateName() {
                     const nameRegex = /^[A-Za-z\s]+$/;
                     this.isNameValid = this.order.name.trim() !== '' && nameRegex.test(this.order.name);
                 },
+                // Validate phone number to ensure it contains only numeric characters
                 validatePhone() {
                     const phoneRegex = /^[0-9]+$/;
                     this.isPhoneValid = this.order.phone.trim() !== '' && phoneRegex.test(this.order.phone);
                 },
+                // Remove an item from the cart and update localStorage
                 removeFromCart(index) {
                     this.cart.splice(index, 1);
                     localStorage.setItem('cart', JSON.stringify(this.cart));
                 },
+                // Update server-side attribute for a specific lesson
                 async modify_space_attribute(attribute, lesson_name, space) {
                     try {
                         const response = await fetch(`https://coursework-1-backend.onrender.com/space/${lesson_name}/${space}`, {
                             method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
+                            headers: { 'Content-Type': 'application/json' }
                         });
-                        const data = await response.json();
-                        console.log('Space updated successfully:', data);
+                        console.log('Space updated successfully:', await response.json());
                     } catch (error) {
                         console.error('Error updating space:', error);
                     }
                 },
+                // Retrieve the available space for a specific lesson from the server
                 async get_value_of_space(lessonName) {
                     try {
                         const response = await fetch(`https://coursework-1-backend.onrender.com/${lessonName}`);
-                        if (!response.ok) {
-                            throw new Error('Failed to retrieve space data');
-                        }
+                        if (!response.ok) throw new Error('Failed to retrieve space data');
                         const data = await response.json();
                         return data.space;
                     } catch (error) {
@@ -143,6 +165,7 @@
                         return null;
                     }
                 },
+                // Handle order submission and update cart state
                 async submitOrder() {
                     this.validateName();
                     this.validatePhone();
@@ -159,21 +182,17 @@
                         num_of_space: []
                     };
 
-                    // Consolidate lesson_id and num_of_space
+                    // Consolidate lessons and their quantities
                     const lessons = {};
                     this.cart.forEach(item => {
-                        if (lessons[item.subject]) {
-                            lessons[item.subject] += 1; // Increment the counter for duplicate lessons
-                        } else {
-                            lessons[item.subject] = 1; // Initialize the counter for new lessons
-                        }
+                        lessons[item.subject] = (lessons[item.subject] || 0) + 1;
                     });
 
-                    // Populate orderData with the consolidated data
-                    orderData.lesson_id = Object.keys(lessons);
-                    orderData.num_of_space = Object.values(lessons);
+                    orderData.lesson_id = Object.keys(lessons); // key stores the lesson name
+                    orderData.num_of_space = Object.values(lessons); // value stores number of spaces
 
                     try {
+                        // Send the order data to the server
                         const response = await fetch('https://coursework-1-backend.onrender.com/order', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -181,16 +200,16 @@
                         });
 
                         if (!response.ok) throw new Error('Failed to submit order');
-                        const result = await response.json();
                         alert('Order submitted successfully!');
 
-                        // Call modify_space_attribute for each lesson and its corresponding quantity
+                        // Update spaces for each lesson based on quantities
                         for (let i = 0; i < orderData.lesson_id.length; i++) {
-                            var old_space = await this.get_value_of_space(orderData.lesson_id[i]);
-                            var new_space = old_space - orderData.num_of_space[i];
-                            this.modify_space_attribute('space', orderData.lesson_id[i], new_space);
+                            const old_space = await this.get_value_of_space(orderData.lesson_id[i]);
+                            const new_space = old_space - orderData.num_of_space[i];
+                            await this.modify_space_attribute('space', orderData.lesson_id[i], new_space);
                         }
 
+                        // Clear the cart and reset form visibility
                         this.cart = [];
                         localStorage.setItem('cart', JSON.stringify(this.cart));
                         this.showCheckoutForm = false;

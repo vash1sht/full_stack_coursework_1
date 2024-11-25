@@ -9,22 +9,16 @@
     <link rel="stylesheet" href="/styles/index.css">
 </head>
 <body>
-    <style>
-        /* Add this to your CSS section */
-        .blurred {
-            filter: blur(5px);
-            pointer-events: none; /* Prevents clicks on blurred area */
-        }
-    </style>
-
     <div id="app">
-        <!-- Header Component -->
+        <!-- Header Component: This section contains the main header of the website, including the site title, search bar, and shopping cart button. -->
         <div id="header">
             <header>
-                <h1>Lessons Store</h1>
-                <input id="search-bar" type="text" v-model="searchQuery" placeholder="Search lessons...">
-                <a href="shopping_cart.html" v-bind:class="{ blurred: cart.length === 0 }" v-bind:disabled="cart.length === 0">
-                    <button :disabled="cart.length === 0">
+                <h1>Lessons-Store.com</h1>
+                <input id="search-bar" 
+                type="text" 
+                v-model="searchQuery" placeholder="Search lessons..."> <!-- Two-way data binding for the search input -->
+                <a href="shopping_cart.html" v-bind:class="{ blurred: cart.length === 0 }" v-bind:disabled="cart.length === 0"> <!-- 'blurred' class when the cart is empty -->
+                    <button :disabled="cart.length === 0"> <!-- Disable the link if the cart is empty -->
                         <i class="fas fa-shopping-cart"></i> View Cart
                         <!-- Display Cart Count -->
                         <span v-if="cart.length > 0" class="cart-count">{{ cart.length }}</span>
@@ -33,45 +27,58 @@
             </header>
         </div>
 
-        <!-- Coursework Component -->
+        <!-- Body Component -->
         <div id="coursework1">
-            <!-- Sidebar for sorting options -->
+            <!-- Sidebar for sorting options: This section allows users to sort lessons by different criteria. -->
             <div class="sidebar">
                 <h2>Sort By:</h2>
+
+                <!-- Sort by Subject: Radio button to select sorting by subject -->
                 <label><input type="radio" value="subject" v-model="sortBy"> Subject</label>
+                <!-- Sort by Location: Radio button to select sorting by location -->
                 <label><input type="radio" value="location" v-model="sortBy"> Location</label>
+                <!-- Sort by Price: Radio button to select sorting by price -->
                 <label><input type="radio" value="price" v-model="sortBy"> Price</label>
+
+                <!-- Sort by Spaces: Radio button to select sorting by available spaces -->
                 <label><input type="radio" value="spaces" v-model="sortBy"> Spaces</label><br><br>
                 <label><input type="radio" value="asc" v-model="sortOrder"> Ascending</label><br>
                 <label><input type="radio" value="desc" v-model="sortOrder"> Descending</label>
             </div>
             
-            <!-- Lessons Container -->
+            <!-- Lessons Container: Displays the lessons after they are filtered and sorted. -->
             <div class="lessons-container">
-                <!-- Loading Spinner -->
+                <!-- Loading Spinner: Shows a spinner while lessons are being loaded. -->
                 <div v-if="loading" class="loading">
                     <div class="spinner"></div>
                     <p>Loading lessons...</p>
                 </div>
 
-                <!-- Lessons Display -->
-                <div v-else-if="filteredLessons.length === 0">
+                <!-- No Lessons Available: Displays a message if there are no lessons available. -->
+                <div v-else-if="filteredLessons.length === 0"> <!-- Executes only if loading is false-->
                     No lessons available at the moment.
                 </div>
-                <div v-else v-for="lesson in filteredLessons" :key="lesson.subject" class="lesson">
+
+                <!-- Lessons Display: Loops through each lesson in filteredLessons and displays its information -->
+                <div v-else v-for="lesson in filteredLessons" :key="lesson.subject" class="lesson"> <!-- Executes once lessons have been loaded -->
+                    <!-- Lesson Information: Displays the details of the lesson, including subject, location, price, and available spaces -->
                     <div class="lesson-info">
-                        <h2>{{ lesson.subject }}</h2>
-                        <p>Location: {{ lesson.location }}</p>
-                        <p>Price: £{{ lesson.price }}</p>
-                        <p>Spaces: {{ lesson.spaces }}</p>
+                        <h2>{{ lesson.subject }}</h2> <!-- Lesson subject -->
+                        <p>Location: {{ lesson.location }}</p> <!-- Lesson location -->
+                        <p>Price: £{{ lesson.price }}</p> <!-- Lesson price -->
+                        <p>Spaces: {{ lesson.spaces }}</p> <!-- Number of available spaces -->
+
+                        <!-- Add to Cart Button: Button to add the lesson to the shopping cart, which is disabled if no spaces are available -->
                         <button 
                             id="addtocart" 
                             v-on:click="addToCart(lesson)"
                             :class="{ blurred: lesson.spaces <= 0 }"
                             :disabled="lesson.spaces <= 0">
                             Add to Cart
-                        </button>
+                        </button> <!-- v-onclick: Trigger addToCart function when clicked -->
+                        <!-- Apply 'blurred' class & disable the button when no spaces are available -->
                     </div>
+                    <!-- Lesson Icon: Displays an icon related to the lesson -->
                     <img :src="lesson.icon" alt="Lesson Icon" class="lesson-icon">
                 </div>
             </div>
@@ -84,14 +91,14 @@
     </div>
 
     <script>
-        // Set your backend URL
+        // Backend server URL
         const BACKEND_SERVER_URL = 'https://coursework-1-backend.onrender.com';
 
         new Vue({
-            el: '#app', // Root Vue instance for managing both header and coursework
+            el: '#app', // Root Vue instance for managing both header and body
             data: {
                 cart: [], // Cart managed at the parent level
-                lessons: [],  // Initialize lessons array
+                lessons: [],  // Initialise lessons array
                 sortBy: 'subject',  // Default sorting option
                 sortOrder: 'asc',   // Default sorting order
                 searchQuery: '',    // Search query
@@ -99,75 +106,149 @@
             },
             computed: {
                 cartCount() {
-                    return this.cart.length;
+                    return this.cart.length; // Returns number of items in cart
                 },
+
                 // Filtered lessons based on search query
                 filteredLessons() {
-                    return this.sortedLessons.filter(lesson => {
+                    return this.sortedLessons.filter(lesson => { // Filter sorted array
                         const query = this.searchQuery.toLowerCase();
+                        // Search for query in both subject & location
                         return lesson.subject.toLowerCase().includes(query) || 
                                lesson.location.toLowerCase().includes(query);
                     });
                 },
+
                 // Sorting logic for lessons
                 sortedLessons() {
+                    // Create a copy of the 'lessons' array to avoid mutating the original array
                     return this.lessons.slice().sort((a, b) => {
+                        // Determine the sorting order: 'asc' for ascending (1) or 'desc' for descending (-1)
                         const modifier = this.sortOrder === 'asc' ? 1 : -1;
+                        // Check if the value for the sorting property is a string
                         if (typeof a[this.sortBy] === 'string') {
+                            // If it's a string, use localeCompare to compare the strings, then multiply by the modifier for sorting order
                             return a[this.sortBy].localeCompare(b[this.sortBy]) * modifier;
                         } else {
+                            // If it's not a string, directly subtract the values to compare them, then multiply by the modifier
                             return (a[this.sortBy] - b[this.sortBy]) * modifier;
                         }
                     });
                 }
             },
             methods: {
-                // Fetch lessons from the backend
-                async fetchLessons() {
+                // Asynchronous method to search for lessons based on a query
+                async searchLessons(search_query) {
                     try {
-                        const response = await fetch(`${BACKEND_SERVER_URL}/lessons`);
+                        // Send a GET request to the backend server with the search query
+                        const response = await fetch(`${BACKEND_SERVER_URL}/search?q=${search_query}`);
+
+                        // Check if the response status is not OK and throw an error if so
                         if (!response.ok) {
                             throw new Error(`Error: ${response.statusText}`);
                         }
+
+                        // Parse the JSON response
                         const data = await response.json();
+
+                        // Map the retrieved lessons to the local lessons array with appropriate formatting
                         this.lessons = data.map(lesson => ({
-                            subject: lesson.topic,
-                            price: lesson.price,
-                            location: lesson.location,
-                            spaces: lesson.space,
+                            subject: lesson.topic, // Lesson's subject
+                            price: lesson.price,  // Price of the lesson
+                            location: lesson.location, // Location of the lesson
+                            spaces: lesson.space, // Available spaces for the lesson
+                            // Generate an icon URL for the lesson using the topic name
                             icon: `${BACKEND_SERVER_URL}/images/${lesson.topic.toLowerCase()}.png`
                         }));
 
-                        // Check if the lesson is in the cart and adjust the spaces
+                        // Check if there are any saved items in the cart (from localStorage)
                         const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+                        
+                        // Adjust the `spaces` value for lessons already in the cart
                         savedCart.forEach(cartItem => {
+                            // Find the corresponding lesson in the current lesson list
                             const lesson = this.lessons.find(lesson => lesson.subject === cartItem.subject);
                             if (lesson) {
-                                lesson.spaces -= 1; // Decrease the spaces for the lesson in the cart
+                                lesson.spaces -= 1; // Reduce available spaces by 1 for each occurrence in the cart
                             }
                         });
                     } catch (error) {
-                        console.error("Error fetching lessons:", error);
+                        // Log any errors that occur during the fetch or processing
+                        console.error("Error fetching lessons searched:", error);
+                        // Alert the user about the error
                         alert("Unable to load lessons. Please try again later.");
                     } finally {
+                        // Set the `loading` state to false to indicate that the search operation is complete
                         this.loading = false;
                     }
                 },
 
+                // Asynchronous method to fetch all lessons from the backend
+                async fetchLessons() {
+                    try {
+                        // Send a GET request to the backend server to retrieve the lessons
+                        const response = await fetch(`${BACKEND_SERVER_URL}/lessons`);
+
+                        // Check if the server response is not OK and throw an error if so
+                        if (!response.ok) {
+                            throw new Error(`Error: ${response.statusText}`);
+                        }
+
+                        // Parse the JSON response to extract lesson data
+                        const data = await response.json();
+
+                        // Map the fetched data to the local 'lessons' array with the required structure
+                        this.lessons = data.map(lesson => ({
+                            subject: lesson.topic, // Lesson topic
+                            price: lesson.price,  // Price of the lesson
+                            location: lesson.location, // Location where the lesson is held
+                            spaces: lesson.space, // Number of available spaces for the lesson
+                            // Create an icon URL for the lesson using its topic name
+                            icon: `${BACKEND_SERVER_URL}/images/${lesson.topic.toLowerCase()}.png`
+                        }));
+
+                        // Retrieve the saved cart data from localStorage, or initialize an empty array if none exists
+                        const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                        // Adjust the spaces for lessons already in the cart
+                        savedCart.forEach(cartItem => {
+                            // Find the corresponding lesson in the current lesson list
+                            const lesson = this.lessons.find(lesson => lesson.subject === cartItem.subject);
+                            if (lesson) {
+                                lesson.spaces -= 1; // Reduce available spaces by 1 for each occurrence in the cart
+                            }
+                        });
+                    } catch (error) {
+                        // Log any errors that occur during the fetch or processing
+                        console.error("Error fetching lessons:", error);
+                        // Alert the user about the error
+                        alert("Unable to load lessons. Please try again later.");
+                    } finally {
+                        // Set the 'loading' state to false to indicate that the fetch operation is complete
+                        this.loading = false;
+                    }
+                },
+
+
                 // Add lesson to the cart and save to localStorage
                 addToCart(lesson) {
+                    // Check if the lesson still has available spaces
                     if (lesson.spaces > 0) {
                         lesson.spaces--;  // Decrease available spaces
-                        this.cart.push(lesson);  // Add item to cart
-                        localStorage.setItem('cart', JSON.stringify(this.cart));  // Update localStorage
+                        this.cart.push(lesson);  // Add the lesson to the cart array
+                        // Save the updated cart to localStorage as a JSON string
+                        localStorage.setItem('cart', JSON.stringify(this.cart));
                     }
                 }
             },
+            // Runs when the Vue instance is created
             created() {
+                // Fetch lessons from the backend to populate the lessons list
                 this.fetchLessons();
-                // Load cart from localStorage
+                // Retrieve the cart data from localStorage if it exists
                 const savedCart = localStorage.getItem('cart');
                 if (savedCart) {
+                    // Parse the JSON string from localStorage to update the cart array
                     this.cart = JSON.parse(savedCart);
                 }
             }

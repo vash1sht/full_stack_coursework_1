@@ -1,230 +1,230 @@
+/* Body Styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f7fc;
-    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Sets the font for the whole page */
+    margin: 0; /* Removes default margin around the body */
+    padding: 0; /* Removes default padding */
+    background-color: #f4f7fc; /* Light blue background */
+    color: #333; /* Standard text color */
 }
 
+/* Header Styling */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    background-color: #4e73df;
-    color: white;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-    border-bottom: 2px solid #ccc;
+    display: flex; /* Use flexbox to arrange elements */
+    justify-content: space-between; /* Space out the header items */
+    align-items: center; /* Center items vertically */
+    padding: 20px 40px; /* Add padding inside the header */
+    background-color: #4e73df; /* Blue background for the header */
+    color: white; /* White text */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Light shadow effect */
+    border-bottom: 2px solid #ccc; /* Thin border at the bottom */
 }
 
 header h1 {
-    font-size: 28px;
-    font-weight: 600;
-    margin: 0;
+    font-size: 28px; /* Size of the header title */
+    font-weight: 600; /* Bold, but not too heavy */
+    margin: 0; /* No extra space around the title */
 }
 
+/* Cart Section */
 #cart-container {
-    padding: 30px;
-    max-width: 1200px;
-    margin: 30px auto;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    padding: 30px; /* Padding around the content */
+    max-width: 1200px; /* Limit the container's width */
+    margin: 30px auto; /* Center the container horizontally */
+    background-color: white; /* White background */
+    border-radius: 10px; /* Round the corners */
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1); /* Add a soft shadow */
+    overflow: hidden; /* Ensure no overflow from the container */
 }
 
 #cart-container h3 {
-    margin-top: 0;
-    font-size: 26px;
-    font-weight: 500;
-    color: #333;
-    border-bottom: 2px solid #f1f1f1;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+    margin-top: 0; /* Remove top margin */
+    font-size: 26px; /* Size of the section title */
+    font-weight: 500; /* Slightly bold font weight */
+    color: #333; /* Dark text color */
+    border-bottom: 2px solid #f1f1f1; /* Light border under the title */
+    padding-bottom: 10px; /* Some space below the title */
+    margin-bottom: 20px; /* Space below the section title */
 }
 
+/* List of Items in Cart */
 #cart-items ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+    list-style-type: none; /* Remove default bullet points */
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove margin */
 }
 
 #cart-items li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-    border: 1px solid #ddd;
+    display: flex; /* Use flexbox for the item layout */
+    justify-content: space-between; /* Space items out */
+    align-items: center; /* Align items vertically */
+    padding: 15px; /* Add padding inside each item */
+    margin-bottom: 10px; /* Space between items */
+    border-radius: 8px; /* Round the corners of each item */
+    background-color: #ffffff; /* White background */
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1); /* Light shadow for each item */
+    transition: transform 0.3s ease; /* Smooth hover transition */
+    border: 1px solid #ddd; /* Thin border around each item */
 }
 
 #cart-items li:hover {
-    transform: translateY(-5px);
-    background-color: #f9fafb;
+    transform: translateY(-5px); /* Slightly lift the item when hovered */
+    background-color: #f9fafb; /* Change background color on hover */
 }
 
+/* Button Styling */
 button {
-    background-color: #4e73df;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    background-color: #4e73df; /* Blue background */
+    color: white; /* White text color */
+    border: none; /* Remove the border */
+    padding: 10px 20px; /* Padding inside the button */
+    font-size: 16px; /* Button font size */
+    border-radius: 5px; /* Round the corners of the button */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth color change when hovering */
 }
 
 button:hover {
-    background-color: #2e59d9;
+    background-color: #2e59d9; /* Darker blue when hovered */
 }
 
 button:disabled {
-    background-color: #aaa;
-    cursor: not-allowed;
+    background-color: #aaa; /* Gray out the button when disabled */
+    cursor: not-allowed; /* Cursor changes to show it's disabled */
 }
 
+/* Cart Summary Section */
 .cart-summary {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 2px solid #f1f1f1;
+    margin-top: 30px; /* Space above the summary */
+    padding-top: 20px; /* Padding on top */
+    border-top: 2px solid #f1f1f1; /* Thin border at the top */
 }
 
 .cart-summary p {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: #333;
+    font-size: 18px; /* Font size for the summary text */
+    font-weight: 600; /* Bold text */
+    margin-bottom: 15px; /* Space below the paragraph */
+    color: #333; /* Dark color for the text */
 }
 
+/* Message for Empty Cart */
 .empty-cart-message {
-    font-size: 18px;
-    color: #888;
-    text-align: center;
-    margin-top: 20px;
+    font-size: 18px; /* Font size */
+    color: #888; /* Light gray text color */
+    text-align: center; /* Center the message */
+    margin-top: 20px; /* Space above the message */
 }
 
+/* Invalid Input Styles */
 .invalid {
-    border-color: red;
+    border-color: red; /* Red border for invalid fields */
 }
 
 .error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-    display: block;
+    color: red; /* Red text for error messages */
+    font-size: 12px; /* Small font size for errors */
+    margin-top: 5px; /* Space above the error */
+    display: block; /* Make the error message appear as a block */
 }
 
-/* Checkout Form Styling */
+/* Checkout Form Styles */
 .checkout-form {
-    margin-top: 30px;
-    padding: 20px;
-    border-radius: 10px;
-    background-color: #f8f9fc;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 30px; /* Space above the form */
+    padding: 20px; /* Padding inside the form */
+    border-radius: 10px; /* Rounded corners */
+    background-color: #f8f9fc; /* Light background */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow around the form */
 }
 
 .checkout-form h3 {
-    font-size: 24px;
-    color: #4e73df;
-    font-weight: 600;
-    margin-bottom: 20px;
-    text-align: center;
-    text-transform: uppercase;
+    font-size: 24px; /* Font size for the title */
+    color: #4e73df; /* Blue color for the title */
+    font-weight: 600; /* Bold font weight */
+    margin-bottom: 20px; /* Space below the title */
+    text-align: center; /* Center the title */
+    text-transform: uppercase; /* Make the title uppercase */
 }
 
 .checkout-form form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: flex; /* Use flexbox for the form layout */
+    flex-direction: column; /* Stack form fields vertically */
+    gap: 20px; /* Space between fields */
 }
 
 .checkout-form label {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 5px;
-    display: block;
-    font-weight: 500;
+    font-size: 16px; /* Font size for the labels */
+    color: #333; /* Dark text color */
+    margin-bottom: 5px; /* Space below each label */
+    display: block; /* Make labels block elements */
+    font-weight: 500; /* Medium font weight */
 }
 
 .checkout-form input {
-    width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    color: #333;
-    background-color: #fff;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%; /* Full width for inputs */
+    padding: 10px 15px; /* Padding inside the input fields */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 8px; /* Round the input corners */
+    font-size: 16px; /* Font size */
+    color: #333; /* Dark text color */
+    background-color: #fff; /* White background */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
 }
 
 .checkout-form input:focus {
-    border-color: #4e73df;
-    box-shadow: 0px 0px 8px rgba(78, 115, 223, 0.3);
-    outline: none;
+    border-color: #4e73df; /* Blue border on focus */
+    box-shadow: 0px 0px 8px rgba(78, 115, 223, 0.3); /* Blue glow effect */
+    outline: none; /* Remove default outline */
 }
 
 .checkout-form input.invalid {
-    border-color: #e74a3b;
+    border-color: #e74a3b; /* Red border for invalid input */
 }
 
 .checkout-form .error-message {
-    margin-top: 5px;
-    font-size: 14px;
-    color: #e74a3b;
+    margin-top: 5px; /* Space above the error message */
+    font-size: 14px; /* Font size for error messages */
+    color: #e74a3b; /* Red color for errors */
 }
 
 .checkout-form button[type="submit"] {
-    width: 100%;
-    background-color: #4e73df;
-    color: #fff;
-    font-size: 18px;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%; /* Make the submit button full-width */
+    background-color: #4e73df; /* Blue background */
+    color: #fff; /* White text color */
+    font-size: 18px; /* Larger font size */
+    padding: 12px; /* Padding inside the button */
+    border: none; /* Remove border */
+    border-radius: 8px; /* Round the button corners */
+    font-weight: bold; /* Make the text bold */
+    text-transform: uppercase; /* Make the button text uppercase */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Transition effects */
 }
 
 .checkout-form button[type="submit"]:hover {
-    background-color: #375abf;
-    transform: translateY(-2px);
+    background-color: #375abf; /* Darker blue when hovered */
+    transform: translateY(-2px); /* Lift the button on hover */
 }
 
 .checkout-form button[type="submit"]:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+    background-color: #ccc; /* Light gray when disabled */
+    cursor: not-allowed; /* Change the cursor to show it can't be clicked */
 }
 
-@media (max-width: 768px) {
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    header {
+        padding: 15px 20px; /* Adjust header padding on small screens */
+    }
+
     #cart-container {
-        padding: 20px;
-        margin: 20px;
-    }
-
-    header h1 {
-        font-size: 24px;
-    }
-
-    .checkout-form {
-        padding: 15px;
-    }
-
-    .checkout-form h3 {
-        font-size: 20px;
-    }
-
-    .checkout-form button[type="submit"] {
-        font-size: 16px;
+        padding: 20px; /* Less padding for smaller screens */
     }
 
     button {
-        width: 100%;
-        padding: 12px;
+        font-size: 14px; /* Smaller buttons on smaller screens */
+        padding: 8px 16px; /* Less padding for buttons */
+    }
+
+    .checkout-form {
+        padding: 15px; /* Less padding for the form */
     }
 }
