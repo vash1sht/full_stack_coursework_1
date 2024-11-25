@@ -22,13 +22,7 @@
             <ul id="cart-items">
                 <li v-for="item in cart" :key="item.subject">
                     <div>
-                        <strong>{{ item.subject }}</strong> - £{{ item.price }} x 
-                        <select v-model="item.quantity" @change="updateCart()">
-                            <option v-for="n in maxQuantity(item)" :key="n" :value="n">{{ n }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <button @click="removeFromCart(item)">Remove</button>
+                        <strong>{{ item.subject }}</strong> - £{{ item.price }} x 1
                     </div>
                 </li>
             </ul>
@@ -52,7 +46,7 @@
 
                     <div v-for="(item, index) in cart" :key="item.subject">
                         <input type="hidden" :value="item.subject" :name="'lesson_id[' + index + ']'">
-                        <input type="hidden" :value="item.quantity" :name="'num_of_space[' + index + ']'">
+                        <input type="hidden" value="1" :name="'num_of_space[' + index + ']'">
                     </div>
 
                     <button type="submit">Submit Order</button>
@@ -75,7 +69,7 @@
             computed: {
                 totalPrice() {
                     return this.cart.reduce((sum, item) => {
-                        return sum + (parseFloat(item.price) * item.quantity);
+                        return sum + parseFloat(item.price); // Calculate total directly
                     }, 0).toFixed(2);
                 }
             },
@@ -84,48 +78,19 @@
                     item.price = parseFloat(item.price);
                     let existingItem = this.cart.find(cartItem => cartItem.subject === item.subject);
 
-                    if (existingItem) {
-                        existingItem.quantity += 1;
-                    } else {
-                        this.cart.push({...item, quantity: 1});
+                    if (!existingItem) {
+                        this.cart.push({...item}); // Add item to cart
                     }
 
                     localStorage.setItem('cart', JSON.stringify(this.cart));
-                },
-                removeFromCart(item) {
-                    this.cart = this.cart.filter(cartItem => cartItem !== item);
-                    localStorage.setItem('cart', JSON.stringify(this.cart));
-                },
-                updateCart() {
-                    localStorage.setItem('cart', JSON.stringify(this.cart));
-                },
-                maxQuantity(item) {
-                    return Math.min(10, item.stock || 10); 
-                },
-                modify_space_attribute(attribute, lesson_name, space) {
-                    fetch(`https://coursework-1-backend.onrender.com/space/${lesson_name}/${space}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Space updated successfully:', data);
-                    })
-                    .catch(error => {
-                        console.error('Error updating space:', error);
-                    });
                 },
                 submitOrder() {
                     const orderData = {
                         name: this.order.name,
                         phone: this.order.phone,
                         lesson_id: this.cart.map(item => item.subject),
-                        num_of_space: this.cart.map(item => item.quantity)
+                        num_of_space: this.cart.map(() => 1) // All quantities are 1
                     };
-
-                    console.log(this.cart);
 
                     // Send order data to backend
                     fetch('https://coursework-1-backend.onrender.com/order', {
@@ -143,25 +108,15 @@
                     })
                     .then(data => {
                         alert('Order submitted successfully!');
-                        // Call modify_space_attribute for each lesson and its corresponding quantity
-                        for (let i = 0; i < orderData.lesson_id.length; i++) {
-                            this.modify_space_attribute(
-                                'space',
-                                orderData.lesson_id[i],
-                                orderData.num_of_space[i]
-                            );
-                        }
-                        // Clear the cart after successful order
-                        this.cart = [];
+                        this.cart = []; // Clear the cart after submission
                         localStorage.setItem('cart', JSON.stringify(this.cart));
-                        this.showCheckoutForm = false;  // Hide form after submission
+                        this.showCheckoutForm = false;
                     })
                     .catch(error => {
                         alert('Error submitting order!');
                         console.error(error);
                     });
                 }
-
             }
         });
     </script>
