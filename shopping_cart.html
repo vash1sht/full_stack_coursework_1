@@ -39,17 +39,36 @@
                 <button @click="showCheckoutForm = true">Proceed to Checkout</button>
             </div>
 
-            <!-- Checkout Form -->
             <div v-if="showCheckoutForm" class="checkout-form">
                 <h3>Checkout</h3>
                 <form @submit.prevent="submitOrder">
                     <div>
                         <label for="name">Name:</label>
-                        <input type="text" id="name" v-model="order.name" required>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            v-model="order.name" 
+                            @input="validateName" 
+                            @blur="validateName" 
+                            :class="{ 'invalid': !isNameValid && order.name.trim() !== '' }" 
+                            placeholder="Enter your name"
+                            required
+                        >
+                        <small v-if="!isNameValid && order.name.trim() !== ''" class="error-message">Name can only contain letters.</small>
                     </div>
                     <div>
                         <label for="phone">Phone:</label>
-                        <input type="tel" id="phone" v-model="order.phone" required>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            v-model="order.phone" 
+                            @input="validatePhone" 
+                            @blur="validatePhone" 
+                            :class="{ 'invalid': !isPhoneValid && order.phone.trim() !== '' }" 
+                            placeholder="Enter your phone number"
+                            required
+                        >
+                        <small v-if="!isPhoneValid && order.phone.trim() !== ''" class="error-message">Phone number should be digits only.</small>
                     </div>
 
                     <div v-for="(item, index) in cart" :key="item.subject">
@@ -57,7 +76,7 @@
                         <input type="hidden" value="1" :name="'num_of_space[' + index + ']'">
                     </div>
 
-                    <button type="submit">Submit Order</button>
+                    <button type="submit" :disabled="!isFormValid">Submit</button>
                 </form>
             </div>
         </div>
@@ -72,29 +91,30 @@
                 order: {
                     name: '',
                     phone: ''
-                }
+                },
+                isNameValid: false,
+                isPhoneValid: false
             },
             computed: {
                 totalPrice() {
-                    return this.cart.reduce((sum, item) => {
-                        return sum + parseFloat(item.price); // Calculate total directly
-                    }, 0).toFixed(2);
+                    return this.cart.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2);
+                },
+                isFormValid() {
+                    return this.isNameValid && this.isPhoneValid;
                 }
             },
             methods: {
-                addToCart(item) {
-                    item.price = parseFloat(item.price);
-                    let existingItem = this.cart.find(cartItem => cartItem.subject === item.subject);
-
-                    if (!existingItem) {
-                        this.cart.push({...item}); // Add item to cart
-                    }
-
-                    localStorage.setItem('cart', JSON.stringify(this.cart));
+                validateName() {
+                    const nameRegex = /^[A-Za-z\s]+$/;
+                    this.isNameValid = this.order.name.trim() !== '' && nameRegex.test(this.order.name);
+                },
+                validatePhone() {
+                    const phoneRegex = /^[0-9]+$/;
+                    this.isPhoneValid = this.order.phone.trim() !== '' && phoneRegex.test(this.order.phone);
                 },
                 removeFromCart(index) {
-                    this.cart.splice(index, 1); // Remove item at the specified index
-                    localStorage.setItem('cart', JSON.stringify(this.cart)); // Update localStorage
+                    this.cart.splice(index, 1);
+                    localStorage.setItem('cart', JSON.stringify(this.cart));
                 },
                 modify_space_attribute(attribute, lesson_name, space) {
                     fetch(`https://coursework-1-backend.onrender.com/space/${lesson_name}/${space}`, {
@@ -112,44 +132,46 @@
                     });
                 },
                 submitOrder() {
+                    this.validateName();
+                    this.validatePhone();
+
+                    if (!this.isFormValid) {
+                        alert('Please fix the errors in the form before submitting.');
+                        return;
+                    }
+
                     const orderData = {
                         name: this.order.name,
                         phone: this.order.phone,
                         lesson_id: this.cart.map(item => item.subject),
-                        num_of_space: this.cart.map(() => 1) // All quantities are 1
+                        num_of_space: this.cart.map(() => 1)
                     };
 
-                    // Send order data to backend
                     fetch('https://coursework-1-backend.onrender.com/order', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(orderData)
                     })
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to submit order');
-                        }
+                        if (!response.ok) throw new Error('Failed to submit order');
                         return response.json();
                     })
-                    .then(data => {
+                    .then(() => {
                         alert('Order submitted successfully!');
-                         // Call modify_space_attribute for each lesson and its corresponding quantity
-                         for (let i = 0; i < orderData.lesson_id.length; i++) {
+                        // Call modify_space_attribute for each lesson and its corresponding quantity
+                        for (let i = 0; i < orderData.lesson_id.length; i++) {
                             this.modify_space_attribute(
                                 'space',
                                 orderData.lesson_id[i],
                                 orderData.num_of_space[i]
                             );
                         }
-                        this.cart = []; // Clear the cart after submission
+                        this.cart = [];
                         localStorage.setItem('cart', JSON.stringify(this.cart));
                         this.showCheckoutForm = false;
                     })
-                    .catch(error => {
+                    .catch(() => {
                         alert('Error submitting order!');
-                        console.error(error);
                     });
                 }
             }
