@@ -25,9 +25,12 @@
         </div>
         <div v-else>
             <ul id="cart-items">
-                <li v-for="item in cart" :key="item.subject">
+                <li v-for="(item, index) in cart" :key="item.subject">
                     <div>
                         <strong>{{ item.subject }}</strong> - £{{ item.price }} x 1
+                        <button @click="removeFromCart(index)" class="remove-button">
+                            <i class="fas fa-trash-alt"></i> Remove
+                        </button>
                     </div>
                 </li>
             </ul>
@@ -88,6 +91,10 @@
                     }
 
                     localStorage.setItem('cart', JSON.stringify(this.cart));
+                },
+                removeFromCart(index) {
+                    this.cart.splice(index, 1); // Remove item at the specified index
+                    localStorage.setItem('cart', JSON.stringify(this.cart)); // Update localStorage
                 },
                 submitOrder() {
                     const orderData = {
