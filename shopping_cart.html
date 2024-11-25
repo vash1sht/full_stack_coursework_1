@@ -116,22 +116,34 @@
                     this.cart.splice(index, 1);
                     localStorage.setItem('cart', JSON.stringify(this.cart));
                 },
-                modify_space_attribute(attribute, lesson_name, space) {
-                    fetch(`https://coursework-1-backend.onrender.com/space/${lesson_name}/${space}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
+                async modify_space_attribute(attribute, lesson_name, space) {
+                    try {
+                        const response = await fetch(`https://coursework-1-backend.onrender.com/space/${lesson_name}/${space}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const data = await response.json();
                         console.log('Space updated successfully:', data);
-                    })
-                    .catch(error => {
+                    } catch (error) {
                         console.error('Error updating space:', error);
-                    });
+                    }
                 },
-                submitOrder() {
+                async get_value_of_space(lessonName) {
+                    try {
+                        const response = await fetch(`https://coursework-1-backend.onrender.com/${lessonName}`);
+                        if (!response.ok) {
+                            throw new Error('Failed to retrieve space data');
+                        }
+                        const data = await response.json();
+                        return data.space;
+                    } catch (error) {
+                        console.error('Error fetching space data:', error);
+                        return null;
+                    }
+                },
+                async submitOrder() {
                     this.validateName();
                     this.validatePhone();
 
@@ -143,36 +155,50 @@
                     const orderData = {
                         name: this.order.name,
                         phone: this.order.phone,
-                        lesson_id: this.cart.map(item => item.subject),
-                        num_of_space: this.cart.map(() => 1)
+                        lesson_id: [],
+                        num_of_space: []
                     };
 
-                    fetch('https://coursework-1-backend.onrender.com/order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(orderData)
-                    })
-                    .then(response => {
+                    // Consolidate lesson_id and num_of_space
+                    const lessons = {};
+                    this.cart.forEach(item => {
+                        if (lessons[item.subject]) {
+                            lessons[item.subject] += 1; // Increment the counter for duplicate lessons
+                        } else {
+                            lessons[item.subject] = 1; // Initialize the counter for new lessons
+                        }
+                    });
+
+                    // Populate orderData with the consolidated data
+                    orderData.lesson_id = Object.keys(lessons);
+                    orderData.num_of_space = Object.values(lessons);
+
+                    try {
+                        const response = await fetch('https://coursework-1-backend.onrender.com/order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(orderData)
+                        });
+
                         if (!response.ok) throw new Error('Failed to submit order');
-                        return response.json();
-                    })
-                    .then(() => {
+                        const result = await response.json();
                         alert('Order submitted successfully!');
+
                         // Call modify_space_attribute for each lesson and its corresponding quantity
                         for (let i = 0; i < orderData.lesson_id.length; i++) {
-                            this.modify_space_attribute(
-                                'space',
-                                orderData.lesson_id[i],
-                                orderData.num_of_space[i]
-                            );
+                            var old_space = await this.get_value_of_space(orderData.lesson_id[i]);
+                            var new_space = old_space - orderData.num_of_space[i];
+                            this.modify_space_attribute('space', orderData.lesson_id[i], new_space);
                         }
+
                         this.cart = [];
                         localStorage.setItem('cart', JSON.stringify(this.cart));
                         this.showCheckoutForm = false;
-                    })
-                    .catch(() => {
+
+                    } catch (error) {
                         alert('Error submitting order!');
-                    });
+                        console.error(error);
+                    }
                 }
             }
         });
