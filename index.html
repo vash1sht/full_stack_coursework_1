@@ -64,7 +64,13 @@
                         <p>Location: {{ lesson.location }}</p>
                         <p>Price: £{{ lesson.price }}</p>
                         <p>Spaces: {{ lesson.spaces }}</p>
-                        <button id="addtocart" @click="addToCart(lesson)">Add to Cart</button>
+                        <button 
+                            id="addtocart" 
+                            @click="addToCart(lesson)"
+                            :class="{ blurred: lesson.spaces <= 0 }"
+                            :disabled="lesson.spaces <= 0">
+                            Add to Cart
+                        </button>
                     </div>
                     <img :src="lesson.icon" alt="Lesson Icon" class="lesson-icon">
                 </div>
@@ -140,8 +146,11 @@
                 },
                 // Add lesson to the cart and save to localStorage
                 addToCart(lesson) {
-                    this.cart.push(lesson);  // Add item to cart
-                    localStorage.setItem('cart', JSON.stringify(this.cart));  // Update localStorage
+                    if (lesson.spaces > 0) {
+                        lesson.spaces--;  // Decrease available spaces
+                        this.cart.push(lesson);  // Add item to cart
+                        localStorage.setItem('cart', JSON.stringify(this.cart));  // Update localStorage
+                    }
                 }
             },
             created() {
