@@ -9,73 +9,93 @@
     <link rel="stylesheet" href="/styles/index.css">
 </head>
 <body>
-    <header>
-        <h1>Lessons Store</h1>
-        <input id="search-bar" type="text" v-model="searchQuery" placeholder="Search lessons...">
-        <a href="shopping_cart.html">
-            <button>
-                <i class="fas fa-shopping-cart"></i> View Cart
-            </button>
-        </a>
-    </header>
-    
-    <div id="coursework1">
-        <!-- Sidebar for sorting options -->
-        <div class="sidebar">
-            <h2>Sort By:</h2>
-            <label><input type="radio" value="subject" v-model="sortBy"> Subject</label>
-            <label><input type="radio" value="location" v-model="sortBy"> Location</label>
-            <label><input type="radio" value="price" v-model="sortBy"> Price</label>
-            <label><input type="radio" value="spaces" v-model="sortBy"> Spaces</label><br><br>
-            <label><input type="radio" value="asc" v-model="sortOrder"> Ascending</label><br>
-            <label><input type="radio" value="desc" v-model="sortOrder"> Descending</label>
-        </div>
-        
-        <!-- Lessons Container -->
-        <div class="lessons-container">
-            <!-- Loading Spinner -->
-            <div v-if="loading" class="loading">
-                <div class="spinner"></div>
-                <p>Loading lessons...</p>
-            </div>
+    <style>
+        /* Add this to your CSS section */
+        .blurred {
+            filter: blur(5px);
+            pointer-events: none; /* Prevents clicks on blurred area */
+        }
+    </style>
 
-            <!-- Lessons Display -->
-            <div v-else-if="filteredLessons.length === 0">
-                No lessons available at the moment.
+    <div id="app">
+        <!-- Header Component -->
+        <div id="header">
+            <header>
+                <h1>Lessons Store</h1>
+                <input id="search-bar" type="text" v-model="searchQuery" placeholder="Search lessons...">
+                <a href="shopping_cart.html" v-bind:class="{ blurred: cart.length === 0 }" v-bind:disabled="cart.length === 0">
+                    <button :disabled="cart.length === 0">
+                        <i class="fas fa-shopping-cart"></i> View Cart
+                        <!-- Display Cart Count -->
+                        <span v-if="cart.length > 0" class="cart-count">{{ cart.length }}</span>
+                    </button>
+                </a>
+            </header>
+        </div>
+
+        <!-- Coursework Component -->
+        <div id="coursework1">
+            <!-- Sidebar for sorting options -->
+            <div class="sidebar">
+                <h2>Sort By:</h2>
+                <label><input type="radio" value="subject" v-model="sortBy"> Subject</label>
+                <label><input type="radio" value="location" v-model="sortBy"> Location</label>
+                <label><input type="radio" value="price" v-model="sortBy"> Price</label>
+                <label><input type="radio" value="spaces" v-model="sortBy"> Spaces</label><br><br>
+                <label><input type="radio" value="asc" v-model="sortOrder"> Ascending</label><br>
+                <label><input type="radio" value="desc" v-model="sortOrder"> Descending</label>
             </div>
-            <div v-else v-for="lesson in filteredLessons" :key="lesson.subject" class="lesson">
-                <div class="lesson-info">
-                    <h2>{{ lesson.subject }}</h2>
-                    <p>Location: {{ lesson.location }}</p>
-                    <p>Price: £{{ lesson.price }}</p>
-                    <p>Spaces: {{ lesson.spaces }}</p>
-                    <button id="addtocart" @click="addToCart(lesson)">Add to Cart</button>
+            
+            <!-- Lessons Container -->
+            <div class="lessons-container">
+                <!-- Loading Spinner -->
+                <div v-if="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading lessons...</p>
                 </div>
-                <img :src="lesson.icon" alt="Lesson Icon" class="lesson-icon">
+
+                <!-- Lessons Display -->
+                <div v-else-if="filteredLessons.length === 0">
+                    No lessons available at the moment.
+                </div>
+                <div v-else v-for="lesson in filteredLessons" :key="lesson.subject" class="lesson">
+                    <div class="lesson-info">
+                        <h2>{{ lesson.subject }}</h2>
+                        <p>Location: {{ lesson.location }}</p>
+                        <p>Price: £{{ lesson.price }}</p>
+                        <p>Spaces: {{ lesson.spaces }}</p>
+                        <button id="addtocart" @click="addToCart(lesson)">Add to Cart</button>
+                    </div>
+                    <img :src="lesson.icon" alt="Lesson Icon" class="lesson-icon">
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <footer style="background-color: #0077b6; color: white; padding: 10px 0; text-align: center;">
-        <p>&copy; 2024 Lessons Store. All Rights Reserved.</p>
-    </footer>
+        <!-- Footer -->
+        <footer style="background-color: #0077b6; color: white; padding: 10px 0; text-align: center;">
+            <p>&copy; 2024 Lessons Store. All Rights Reserved.</p>
+        </footer>
+    </div>
 
     <script>
         // Set your backend URL
         const BACKEND_SERVER_URL = 'https://coursework-1-backend.onrender.com';
+
         new Vue({
-            el: '#coursework1',
+            el: '#app', // Root Vue instance for managing both header and coursework
             data: {
+                cart: [], // Cart managed at the parent level
                 lessons: [],  // Initialize lessons array
                 sortBy: 'subject',  // Default sorting option
                 sortOrder: 'asc',   // Default sorting order
                 searchQuery: '',    // Search query
-                cart: [],
                 loading: true       // Track loading state
             },
             computed: {
-                // Filtered and sorted lessons based on search and sort order
+                cartCount() {
+                    return this.cart.length;
+                },
+                // Filtered lessons based on search query
                 filteredLessons() {
                     return this.sortedLessons.filter(lesson => {
                         const query = this.searchQuery.toLowerCase();
@@ -83,6 +103,7 @@
                                lesson.location.toLowerCase().includes(query);
                     });
                 },
+                // Sorting logic for lessons
                 sortedLessons() {
                     return this.lessons.slice().sort((a, b) => {
                         const modifier = this.sortOrder === 'asc' ? 1 : -1;
@@ -95,6 +116,7 @@
                 }
             },
             methods: {
+                // Fetch lessons from the backend
                 async fetchLessons() {
                     try {
                         const response = await fetch(`${BACKEND_SERVER_URL}/lessons`);
@@ -113,13 +135,13 @@
                         console.error("Error fetching lessons:", error);
                         alert("Unable to load lessons. Please try again later.");
                     } finally {
-                        this.loading = false;  // Stop loading once data is fetched
+                        this.loading = false;
                     }
                 },
+                // Add lesson to the cart and save to localStorage
                 addToCart(lesson) {
-                    this.cart.push(lesson);
-                    // Save to localStorage
-                    localStorage.setItem('cart', JSON.stringify(this.cart));
+                    this.cart.push(lesson);  // Add item to cart
+                    localStorage.setItem('cart', JSON.stringify(this.cart));  // Update localStorage
                 }
             },
             created() {
@@ -129,7 +151,7 @@
                 if (savedCart) {
                     this.cart = JSON.parse(savedCart);
                 }
-            },
+            }
         });
     </script>
 </body>
