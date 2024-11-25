@@ -96,6 +96,21 @@
                     this.cart.splice(index, 1); // Remove item at the specified index
                     localStorage.setItem('cart', JSON.stringify(this.cart)); // Update localStorage
                 },
+                modify_space_attribute(attribute, lesson_name, space) {
+                    fetch(`https://coursework-1-backend.onrender.com/space/${lesson_name}/${space}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Space updated successfully:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating space:', error);
+                    });
+                },
                 submitOrder() {
                     const orderData = {
                         name: this.order.name,
@@ -120,6 +135,14 @@
                     })
                     .then(data => {
                         alert('Order submitted successfully!');
+                         // Call modify_space_attribute for each lesson and its corresponding quantity
+                         for (let i = 0; i < orderData.lesson_id.length; i++) {
+                            this.modify_space_attribute(
+                                'space',
+                                orderData.lesson_id[i],
+                                orderData.num_of_space[i]
+                            );
+                        }
                         this.cart = []; // Clear the cart after submission
                         localStorage.setItem('cart', JSON.stringify(this.cart));
                         this.showCheckoutForm = false;
